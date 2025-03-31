@@ -486,7 +486,7 @@
                 // Create tweet intent URL with tries count
                 const triesText = document.getElementById('congratsText').innerText.match(/in (\d+) tr/);
                 const tries = triesText ? triesText[1] : "many";
-                const tweetText = `I found the $way in ${tries} ${tries === "1" ? "try" : "tries"}! #Solana #Memecoin`;
+                const tweetText = `I found the $way in ${tries} ${tries === "1" ? "try" : "tries"}!`;
                 const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
                 
                 // First, trigger the download of the image
@@ -524,7 +524,7 @@
                             // Play door opening sound at moderate volume
                             doorOpenSound.volume = 0.5;
                             doorOpenSound.play();
-                        }, 200);
+                        }, 100);
                         
                         // Show green background for correct door
                         doorFrame.classList.add('correct');
@@ -569,7 +569,7 @@
                             // Play wrong door sound at moderate volume
                             wrongDoorSound.volume = 0.5;
                             wrongDoorSound.play();
-                        }, 200);
+                        }, 100);
                         
                         // Wrong door chosen
                         setTimeout(() => {
