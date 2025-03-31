@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find The $way</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            padding: 20px;
+        }
+
+        .door-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 50px 0;
+        }
+
+        .door {
+            width: 150px;
+            height: 300px;
+            position: relative;
+            cursor: pointer;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+
+        .door-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            transform-origin: left;
+            transition: transform 1s cubic-bezier(0.4, 0.0, 0.2, 1);
+            background-color: #8B4513;
+            border: 8px solid #654321;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .door:hover .door-face {
+            transform: scale(1.02);
+            transition: transform 0.3s ease-out;
+        }
+
+        .door-frame {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #F5F5DC;
+            border: 8px solid #654321;
+            border-radius: 5px;
+            box-sizing: border-box;
+            z-index: -1;
+            transition: background-color 0.5s ease;
+        }
+        
+        .door-frame.correct {
+            background-color: #4CAF50; /* Green */
+        }
+        
+        .door-frame.incorrect {
+            background-color: #F44336; /* Red */
+        }
+
+        .door-knob {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            width: 15px;
+            height: 15px;
+            background-color: #FFD700;
+            border-radius: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .door.opening .door-face {
+            transform: rotateY(-105deg);
+            box-shadow: 5px 0 15px rgba(0,0,0,0.2);
+        }
+
+        .door-hinge-top, .door-hinge-bottom {
+            position: absolute;
+            left: 0;
+            width: 20px;
+            height: 8px;
+            background-color: #484530;
+            border-radius: 2px;
+            z-index: 2;
+        }
+
+        .door-hinge-top {
+            top: 40px;
+        }
+
+        .door-hinge-bottom {
+            bottom: 40px;
+        }
+
+        .progress-bar {
+            width: 300px;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .congrats-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .whitepaper {
+            width: 600px;
+            height: 400px;
+            background-color: white;
+            border: 2px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .whitepaper-text {
+            font-family: 'Times New Roman', serif;
+            font-size: 36px;
+            margin-bottom: 80px;
+            margin-top: 50px;
+            text-align: center;
+            color: #000;
+            font-weight: 500;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .signature-label {
+            font-family: 'Arial', sans-serif;
+            font-style: italic;
+            margin-bottom: 5px;
+            color: #555;
+            pointer-events: none;
+            z-index: 2;
+            position: absolute;
+            top: 200px;
+            left: 50px;
+        }
+
+        #signature-pad {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+            touch-action: none;
+            z-index: 1;
+        }
+
+        .clear-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        
+        .twitter-instruction {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #555;
+            max-width: 500px;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .game-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .download-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .twitter-btn {
+            background-color: #1DA1F2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="game-screen">
+            <h1>Find The $way</h1>
+            <p>Choose the correct door 3 times in a row to win!</p>
+            
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            
+            <div class="door-container">
+                <div class="door" id="door1" data-id="1">
+                    <div class="door-frame"></div>
+                    <div class="door-face">
+                        <div class="door-knob"></div>
+                    </div>
+                    <div class="door-hinge-top"></div>
+                    <div class="door-hinge-bottom"></div>
+                </div>
+                <div class="door" id="door2" data-id="2">
+                    <div class="door-frame"></div>
+                    <div class="door-face">
+                        <div class="door-knob"></div>
+                    </div>
+                    <div class="door-hinge-top"></div>
+                    <div class="door-hinge-bottom"></div>
+                </div>
+                <div class="door" id="door3" data-id="3">
+                    <div class="door-frame"></div>
+                    <div class="door-face">
+                        <div class="door-knob"></div>
+                    </div>
+                    <div class="door-hinge-top"></div>
+                    <div class="door-hinge-bottom"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="congrats-screen" id="congratsScreen">
+            <div class="whitepaper" id="whitepaper">
+                <div class="whitepaper-text" id="congratsText">Congratulations, you found the $way</div>
+                <div class="signature-label">Signed by:</div>
+                <canvas id="signature-pad"></canvas>
+            </div>
+            <div>
+                <button class="clear-btn" id="clearBtn">Clear Signature</button>
+                <button class="download-btn" id="downloadBtn">Download</button>
+                <button class="twitter-btn" id="twitterBtn">Share on Twitter</button>
+            </div>
+            <div class="twitter-instruction">
+                Note: Clicking "Share on Twitter" will download your certificate and open Twitter.
+                Please manually attach the downloaded image to your tweet.
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        CA: xxxxxxxxxxxxxxxxxxxpump
+    </div>
+
+    <!-- Audio elements -->
+    <audio id="doorOpenSound" src="sounds/correct.mp3" preload="auto" volume="0.5"></audio>
+    <audio id="wrongDoorSound" src="sounds/wrong.mp3" preload="auto" volume="0.5"></audio>
+    <audio id="congratsSound" src="sounds/congratulations.mp3" preload="auto" volume="0.5"></audio>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const doors = document.querySelectorAll('.door');
+            const progressBar = document.getElementById('progress');
+            const congratsScreen = document.getElementById('congratsScreen');
+            const gameScreen = document.querySelector('.game-screen');
+            const doorOpenSound = document.getElementById('doorOpenSound');
+            const wrongDoorSound = document.getElementById('wrongDoorSound');
+            const congratsSound = document.getElementById('congratsSound');
+            
+            let correctDoor = getRandomDoor();
+            let correctChoices = 0;
+            let maxCorrectChoices = 3;
+            let totalTries = 0; // Counter for total tries
+            
+            // Initialize signature pad
+            const canvas = document.getElementById('signature-pad');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas dimensions to match its display size
+            function resizeCanvas() {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                canvas.width = canvas.offsetWidth * ratio;
+                canvas.height = canvas.offsetHeight * ratio;
+                ctx.scale(ratio, ratio);
+            }
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            const signaturePad = new SignaturePad(canvas, {
+                backgroundColor: 'rgba(255, 255, 255, 0)',
+                penColor: 'black',
+                minWidth: 1,
+                maxWidth: 2.5
+            });
+            
+            // Button handlers
+            document.getElementById('clearBtn').addEventListener('click', function() {
+                signaturePad.clear();
+            });
+            
+            document.getElementById('downloadBtn').addEventListener('click', function() {
+                if (signaturePad.isEmpty()) {
+                    alert('Please provide a signature first.');
+                    return;
+                }
+                
+                // Get the whitepaper element
+                const whitepaper = document.getElementById('whitepaper');
+                
+                // Create a temporary canvas with fixed dimensions to ensure consistent output
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = 600;
+                tempCanvas.height = 400;
+                const tempContext = tempCanvas.getContext('2d');
+                
+                // Draw white background
+                tempContext.fillStyle = 'white';
+                tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                
+                // Draw border
+                tempContext.strokeStyle = '#ccc';
+                tempContext.lineWidth = 2;
+                tempContext.strokeRect(0, 0, tempCanvas.width, tempCanvas.height);
+                
+                // Draw the text
+                tempContext.font = '36px Times New Roman';
+                tempContext.fillStyle = 'black';
+                tempContext.textAlign = 'center';
+                
+                // Get the congratulations text with tries count
+                const congratsText = document.getElementById('congratsText').innerText;
+                
+                // Handle text that might be too long
+                const maxWidth = 500;
+                let fontSize = 36;
+                tempContext.font = fontSize + 'px Times New Roman';
+                
+                // Measure text and reduce font size if needed
+                if (tempContext.measureText(congratsText).width > maxWidth) {
+                    while (tempContext.measureText(congratsText).width > maxWidth && fontSize > 20) {
+                        fontSize -= 2;
+                        tempContext.font = fontSize + 'px Times New Roman';
+                    }
+                }
+                
+                tempContext.fillText(congratsText, tempCanvas.width / 2, 100);
+                
+                // Draw signature label
+                tempContext.font = 'italic 14px Arial';
+                tempContext.textAlign = 'left';
+                tempContext.fillText('Signed by:', 50, 200);
+                
+                // Draw signature exactly as it appears - the full canvas
+                const signatureData = signaturePad.toDataURL('image/png');
+                const signatureImg = new Image();
+                signatureImg.onload = function() {
+                    // Draw the signature across the entire canvas
+                    tempContext.drawImage(signatureImg, 0, 0, tempCanvas.width, tempCanvas.height);
+                    
+                    // Convert to image and download
+                    const image = tempCanvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.href = image;
+                    link.download = 'found-the-way.png';
+                    link.click();
+                };
+                signatureImg.src = signatureData;
+            });
+            
+            document.getElementById('twitterBtn').addEventListener('click', function() {
+                if (signaturePad.isEmpty()) {
+                    alert('Please provide a signature first.');
+                    return;
+                }
+                
+                // Show a confirmation alerting users about the process
+                const confirm = window.confirm("This will download your certificate and open Twitter. You'll need to manually attach the image to your tweet. Continue?");
+                if (!confirm) return;
+                
+                // Create tweet intent URL with tries count
+                const triesText = document.getElementById('congratsText').innerText.match(/in (\d+) tr/);
+                const tries = triesText ? triesText[1] : "many";
+                const tweetText = `I found the $way in ${tries} ${tries === "1" ? "try" : "tries"}!`;
+                const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+                
+                // First, trigger the download of the image
+                document.getElementById('downloadBtn').click();
+                
+                // Then open Twitter intent in a new window
+                setTimeout(() => {
+                    window.open(twitterUrl, '_blank');
+                }, 800);
+            });
+            
+            // Setup doors
+            doors.forEach(door => {
+                door.addEventListener('click', function() {
+                    // If game is in progress (a door is currently opening), ignore clicks
+                    if (document.querySelector('.door.opening')) return;
+                    
+                    // If player hasn't made any correct choices yet, any door is correct
+                    const doorId = parseInt(this.getAttribute('data-id'));
+                    const doorFrame = this.querySelector('.door-frame');
+                    
+                    // Increment total tries on first door click of each round
+                    if (correctChoices === 0) {
+                        totalTries++;
+                        console.log("Incrementing tries to: " + totalTries);
+                    }
+                    
+                    // Add opening animation
+                    this.classList.add('opening');
+                    
+                    // For first round, all doors are correct
+                    if (correctChoices === 0 || doorId === correctDoor) {
+                        // Short delay before playing sound to sync with animation
+                        setTimeout(() => {
+                            // Play door opening sound at moderate volume
+                            doorOpenSound.volume = 0.5;
+                            doorOpenSound.play();
+                        }, 100);
+                        
+                        // Show green background for correct door
+                        doorFrame.classList.add('correct');
+                        
+                        correctChoices++;
+                        
+                        // Update progress bar
+                        progressBar.style.width = (correctChoices / maxCorrectChoices * 100) + '%';
+                        
+                        // Check if won
+                        if (correctChoices >= maxCorrectChoices) {
+                            setTimeout(() => {
+                                gameScreen.style.display = 'none';
+                                congratsScreen.style.display = 'flex';
+                                
+                                // Update congratulations text with number of tries
+                                document.getElementById('congratsText').innerText = 
+                                    `Congratulations, you found the $way in ${totalTries} ${totalTries === 1 ? 'try' : 'tries'}`;
+                                console.log("Final tries count: " + totalTries);
+                                
+                                // Play congrats sound with a slight delay at moderate volume
+                                setTimeout(() => {
+                                    congratsSound.volume = 0.5;
+                                    congratsSound.play();
+                                }, 300);
+                                
+                                // Show confetti
+                                createConfetti();
+                            }, 1000);
+                        } else {
+                            // Reset doors for next round
+                            setTimeout(() => {
+                                resetDoors();
+                            }, 1000);
+                        }
+                    } else {
+                        // Show red background for incorrect door
+                        doorFrame.classList.add('incorrect');
+                        
+                        // Short delay before playing sound to sync with animation
+                        setTimeout(() => {
+                            // Play wrong door sound at moderate volume
+                            wrongDoorSound.volume = 0.5;
+                            wrongDoorSound.play();
+                        }, 100);
+                        
+                        // Wrong door chosen
+                        setTimeout(() => {
+                            // Reset progress and doors
+                            correctChoices = 0;
+                            progressBar.style.width = '0%';
+                            resetDoors();
+                        }, 1000);
+                    }
+                });
+            });
+            
+            function resetDoors() {
+                doors.forEach(door => {
+                    door.classList.remove('opening');
+                    const doorFrame = door.querySelector('.door-frame');
+                    doorFrame.classList.remove('correct');
+                    doorFrame.classList.remove('incorrect');
+                });
+                
+                // Get new random correct door
+                correctDoor = getRandomDoor();
+            }
+            
+            function getRandomDoor() {
+                return Math.floor(Math.random() * 3) + 1;
+            }
+            
+            function createConfetti() {
+                const confettiCount = 100;
+                const colors = ['#f00', '#0f0', '#00f', '#ff0', '#0ff', '#f0f'];
+                
+                for (let i = 0; i < confettiCount; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.classList.add('confetti');
+                        
+                        // Randomize position, color, and animation
+                        const isLeft = Math.random() < 0.5;
+                        confetti.style.left = isLeft ? '10%' : '90%';
+                        confetti.style.top = Math.random() * 100 + '%';
+                        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        
+                        // Add to body
+                        document.body.appendChild(confetti);
+                        
+                        // Animate
+                        const animationDuration = 2000 + Math.random() * 3000;
+                        confetti.animate([
+                            { transform: `translate(0, 0) rotate(0deg)` },
+                            { transform: `translate(${isLeft ? '500px' : '-500px'}, 500px) rotate(${Math.random() * 360}deg)` }
+                        ], {
+                            duration: animationDuration,
+                            easing: 'cubic-bezier(0.1, 0.8, 0.9, 0.2)'
+                        });
+                        
+                        // Remove after animation
+                        setTimeout(() => {
+                            document.body.removeChild(confetti);
+                        }, animationDuration);
+                    }, Math.random() * 500);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
