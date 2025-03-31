@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find The $way</title>
+    <title>Find the $way</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -293,7 +293,7 @@
 <body>
     <div class="container">
         <div class="game-screen" id="gameScreen">
-            <h1>Find The $way</h1>
+            <h1>Find the $way</h1>
             <p>Choose the correct door 3 times in a row to win!</p>
             
             <div class="progress-bar">
@@ -351,7 +351,6 @@
             <svg class="twitter-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
             </svg>
-            @WAYON_SOL
         </a>
         <span class="footer-separator">|</span>
         CA: xxxxxxxxxxxxxxxxxxxpump
@@ -479,7 +478,7 @@
                 // Fix the regex to match "tries" or "try"
                 const triesText = document.getElementById('congratsText').innerText.match(/in (\d+) (try|tries)/);
                 const tries = triesText ? triesText[1] : "many";
-                const tweetText = `I found the $way in ${tries} ${tries === "1" ? "try" : "tries"}! #Solana #Memecoin`;
+                const tweetText = `I found the $way in ${tries} ${tries === "1" ? "try" : "tries"}!`;
                 const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
                 
                 document.getElementById('downloadBtn').click();
