@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Find the $way</title>
+    <title>Find The $way</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -232,6 +232,34 @@
             border-radius: 5px;
         }
         
+        .download-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .twitter-btn {
+            background-color: #1DA1F2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        
         .twitter-instruction {
             margin-top: 15px;
             font-size: 14px;
@@ -260,40 +288,12 @@
             align-items: center;
             width: 100%;
         }
-
-        .download-btn {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 10px 5px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-
-        .twitter-btn {
-            background-color: #1DA1F2;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 10px 5px;
-            cursor: pointer;
-            border-radius: 5px;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="game-screen">
-            <h1>Find the $way</h1>
+        <div class="game-screen" id="gameScreen">
+            <h1>Find The $way</h1>
             <p>Choose the correct door 3 times in a row to win!</p>
             
             <div class="progress-bar">
@@ -351,6 +351,7 @@
             <svg class="twitter-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
             </svg>
+            @WAYON_SOL
         </a>
         <span class="footer-separator">|</span>
         CA: xxxxxxxxxxxxxxxxxxxpump
@@ -367,7 +368,7 @@
             const doors = document.querySelectorAll('.door');
             const progressBar = document.getElementById('progress');
             const congratsScreen = document.getElementById('congratsScreen');
-            const gameScreen = document.querySelector('.game-screen');
+            const gameScreen = document.getElementById('gameScreen');
             const doorOpenSound = document.getElementById('doorOpenSound');
             const wrongDoorSound = document.getElementById('wrongDoorSound');
             const congratsSound = document.getElementById('congratsSound');
@@ -375,73 +376,71 @@
             let correctDoor = getRandomDoor();
             let correctChoices = 0;
             let maxCorrectChoices = 3;
-            let totalTries = 0; // Counter for total tries
-            
-            // Initialize signature pad
-            const canvas = document.getElementById('signature-pad');
-            const ctx = canvas.getContext('2d');
-            
-            // Set canvas dimensions to match its display size
-            function resizeCanvas() {
-                const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                canvas.width = canvas.offsetWidth * ratio;
-                canvas.height = canvas.offsetHeight * ratio;
-                ctx.scale(ratio, ratio);
+            let totalTries = 0;
+            let signaturePad;
+
+            // Initialize signature pad only when the congrats screen is shown
+            function initializeSignaturePad() {
+                const canvas = document.getElementById('signature-pad');
+                const ctx = canvas.getContext('2d');
+                
+                function resizeCanvas() {
+                    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                    canvas.width = canvas.offsetWidth * ratio;
+                    canvas.height = canvas.offsetHeight * ratio;
+                    ctx.scale(ratio, ratio);
+                    // Clear the canvas after resizing to avoid distortion
+                    if (signaturePad) {
+                        signaturePad.clear();
+                    }
+                }
+                
+                resizeCanvas();
+                window.addEventListener('resize', resizeCanvas);
+                
+                signaturePad = new SignaturePad(canvas, {
+                    backgroundColor: 'rgba(255, 255, 255, 0)',
+                    penColor: 'black',
+                    minWidth: 1,
+                    maxWidth: 2.5
+                });
             }
-            
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-            
-            const signaturePad = new SignaturePad(canvas, {
-                backgroundColor: 'rgba(255, 255, 255, 0)',
-                penColor: 'black',
-                minWidth: 1,
-                maxWidth: 2.5
-            });
-            
+
             // Button handlers
             document.getElementById('clearBtn').addEventListener('click', function() {
-                signaturePad.clear();
+                if (signaturePad) {
+                    signaturePad.clear();
+                }
             });
             
             document.getElementById('downloadBtn').addEventListener('click', function() {
-                if (signaturePad.isEmpty()) {
+                if (!signaturePad || signaturePad.isEmpty()) {
                     alert('Please provide a signature first.');
                     return;
                 }
                 
-                // Get the whitepaper element
                 const whitepaper = document.getElementById('whitepaper');
-                
-                // Create a temporary canvas with fixed dimensions to ensure consistent output
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = 600;
                 tempCanvas.height = 400;
                 const tempContext = tempCanvas.getContext('2d');
                 
-                // Draw white background
                 tempContext.fillStyle = 'white';
                 tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
                 
-                // Draw border
                 tempContext.strokeStyle = '#ccc';
                 tempContext.lineWidth = 2;
                 tempContext.strokeRect(0, 0, tempCanvas.width, tempCanvas.height);
                 
-                // Draw the text
                 tempContext.font = '36px Times New Roman';
                 tempContext.fillStyle = 'black';
                 tempContext.textAlign = 'center';
                 
-                // Get the congratulations text with tries count
                 const congratsText = document.getElementById('congratsText').innerText;
-                
-                // Handle text that might be too long
                 const maxWidth = 500;
                 let fontSize = 36;
                 tempContext.font = fontSize + 'px Times New Roman';
                 
-                // Measure text and reduce font size if needed
                 if (tempContext.measureText(congratsText).width > maxWidth) {
                     while (tempContext.measureText(congratsText).width > maxWidth && fontSize > 20) {
                         fontSize -= 2;
@@ -451,19 +450,14 @@
                 
                 tempContext.fillText(congratsText, tempCanvas.width / 2, 100);
                 
-                // Draw signature label
                 tempContext.font = 'italic 14px Arial';
                 tempContext.textAlign = 'left';
                 tempContext.fillText('Signed by:', 50, 200);
                 
-                // Draw signature exactly as it appears - the full canvas
                 const signatureData = signaturePad.toDataURL('image/png');
                 const signatureImg = new Image();
                 signatureImg.onload = function() {
-                    // Draw the signature across the entire canvas
                     tempContext.drawImage(signatureImg, 0, 0, tempCanvas.width, tempCanvas.height);
-                    
-                    // Convert to image and download
                     const image = tempCanvas.toDataURL('image/png');
                     const link = document.createElement('a');
                     link.href = image;
@@ -474,25 +468,22 @@
             });
             
             document.getElementById('twitterBtn').addEventListener('click', function() {
-                if (signaturePad.isEmpty()) {
+                if (!signaturePad || signaturePad.isEmpty()) {
                     alert('Please provide a signature first.');
                     return;
                 }
                 
-                // Show a confirmation alerting users about the process
                 const confirm = window.confirm("This will download your certificate and open Twitter. You'll need to manually attach the image to your tweet. Continue?");
                 if (!confirm) return;
                 
-                // Create tweet intent URL with tries count
-                const triesText = document.getElementById('congratsText').innerText.match(/in (\d+) tr/);
+                // Fix the regex to match "tries" or "try"
+                const triesText = document.getElementById('congratsText').innerText.match(/in (\d+) (try|tries)/);
                 const tries = triesText ? triesText[1] : "many";
-                const tweetText = `I found the $way in ${tries} ${tries === "1" ? "try" : "tries"}!`;
+                const tweetText = `I found the $way in ${tries} ${tries === "1" ? "try" : "tries"}! #Solana #Memecoin`;
                 const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
                 
-                // First, trigger the download of the image
                 document.getElementById('downloadBtn').click();
                 
-                // Then open Twitter intent in a new window
                 setTimeout(() => {
                     window.open(twitterUrl, '_blank');
                 }, 800);
@@ -501,79 +492,63 @@
             // Setup doors
             doors.forEach(door => {
                 door.addEventListener('click', function() {
-                    // If game is in progress (a door is currently opening), ignore clicks
                     if (document.querySelector('.door.opening')) return;
                     
-                    // If player hasn't made any correct choices yet, any door is correct
                     const doorId = parseInt(this.getAttribute('data-id'));
                     const doorFrame = this.querySelector('.door-frame');
                     
-                    // Increment total tries on first door click of each round
                     if (correctChoices === 0) {
                         totalTries++;
                         console.log("Incrementing tries to: " + totalTries);
                     }
                     
-                    // Add opening animation
                     this.classList.add('opening');
                     
-                    // For first round, all doors are correct
                     if (correctChoices === 0 || doorId === correctDoor) {
-                        // Short delay before playing sound to sync with animation
                         setTimeout(() => {
-                            // Play door opening sound at moderate volume
                             doorOpenSound.volume = 0.5;
                             doorOpenSound.play();
-                        }, 100);
+                        }, 200);
                         
-                        // Show green background for correct door
                         doorFrame.classList.add('correct');
                         
                         correctChoices++;
                         
-                        // Update progress bar
                         progressBar.style.width = (correctChoices / maxCorrectChoices * 100) + '%';
                         
-                        // Check if won
                         if (correctChoices >= maxCorrectChoices) {
                             setTimeout(() => {
                                 gameScreen.style.display = 'none';
                                 congratsScreen.style.display = 'flex';
                                 
-                                // Update congratulations text with number of tries
                                 document.getElementById('congratsText').innerText = 
                                     `Congratulations, you found the $way in ${totalTries} ${totalTries === 1 ? 'try' : 'tries'}`;
                                 console.log("Final tries count: " + totalTries);
                                 
-                                // Play congrats sound with a slight delay at moderate volume
+                                // Initialize signature pad when the congrats screen is shown
+                                initializeSignaturePad();
+                                
                                 setTimeout(() => {
                                     congratsSound.volume = 0.5;
                                     congratsSound.play();
                                 }, 300);
                                 
-                                // Show confetti
                                 createConfetti();
                             }, 1000);
                         } else {
-                            // Reset doors for next round
                             setTimeout(() => {
                                 resetDoors();
                             }, 1000);
                         }
                     } else {
-                        // Show red background for incorrect door
-                        doorFrame.classList.add('incorrect');
-                        
-                        // Short delay before playing sound to sync with animation
                         setTimeout(() => {
-                            // Play wrong door sound at moderate volume
                             wrongDoorSound.volume = 0.5;
                             wrongDoorSound.play();
-                        }, 100);
+                        }, 200);
                         
-                        // Wrong door chosen
+                        doorFrame.classList.add('incorrect');
+                        
                         setTimeout(() => {
-                            // Reset progress and doors
                             correctChoices = 0;
                             progressBar.style.width = '0%';
                             resetDoors();
@@ -590,7 +565,6 @@
                     doorFrame.classList.remove('incorrect');
                 });
                 
-                // Get new random correct door
                 correctDoor = getRandomDoor();
             }
             
@@ -607,16 +581,13 @@
                         const confetti = document.createElement('div');
                         confetti.classList.add('confetti');
                         
-                        // Randomize position, color, and animation
                         const isLeft = Math.random() < 0.5;
                         confetti.style.left = isLeft ? '10%' : '90%';
                         confetti.style.top = Math.random() * 100 + '%';
                         confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
                         
-                        // Add to body
                         document.body.appendChild(confetti);
                         
-                        // Animate
                         const animationDuration = 2000 + Math.random() * 3000;
                         confetti.animate([
                             { transform: `translate(0, 0) rotate(0deg)` },
@@ -626,7 +597,6 @@
                             easing: 'cubic-bezier(0.1, 0.8, 0.9, 0.2)'
                         });
                         
-                        // Remove after animation
                         setTimeout(() => {
                             document.body.removeChild(confetti);
                         }, animationDuration);
